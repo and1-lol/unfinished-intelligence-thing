@@ -5,9 +5,6 @@ import math
 
 ignore = ["if", "what", "of", "a", "an", "and", "is"]
 
-poland = []
-austria = []
-cmd = "None"
 act = 0
 
 weights = [
@@ -34,56 +31,200 @@ bias = [
     11.98331999454279
 ]
 
-def analyze_file_for_phrase(file_path, target_phrase, victor):
+weights2 = [
+  [-18.0308,1.68350364,-28.98336721],
+]
+
+bias2 = [
+  -10.64527579,
+]
+
+def fileread(file):
+  with open(file, "r") as file:
+            file_content = file.read()
+            content = json.loads(file_content)
+  return content
+
+def generate(prev_word, answer, worddef, isa):
+  response = []
+  toggle = True
+
+  response.append(prev_word)
+  vocabulary = fileread('vocab.json')
+  
+  while toggle:
+    prev_val = vocabulary[prev_word]
+    word = finder(prev_val)
+    if len(response) > 10:
+      word = worddef
+      toggle = False
+    if word == "end":
+      toggle = False
+    if word == "output":
+      if worddef is not None and isa is not None:
+        word = f"{worddef} and {isa}"
+      elif worddef is not None:
+        word = worddef
+      elif isa is not None:
+        word = isa
+      else:
+        if isinstance(word, list):
+          word = " ".join(word)
+        else:
+          word = word.strip("[]''")
+      toggle = False
+    response.append(word)
+    prev_word = word
+    
+  response_final = " ".join(response)
+  print(f"{response_final}")
+  return
+
+def neuron2(input):
+    global act
+  
+    output = 0
+    output3 = 0
+    for i in range(3):
+      we = None
+      we = weights2[act]
+      output += input[i] * we[i]
+    for i in range(3):
+      we = None
+      we = weights[act]
+      output += input[i + 3] * we[i]
+
+    output += bias2[act]
+    output3 = 1 / ((2.718 ** (output * -1)) + 1)
+
+    return output3
+    
+def finder(value):
+  global act
+  predictions = {}
+  outputs = []
+  decimals = []
+  vocablist = None
+  
+  act = 0
+  for a in vocab:
+    vocablist = vocab[a].copy()
+    
+    for c in range(len(value)):
+      vocablist[c] += value[c]
+
+    betterinputs = []
+    for d in vocablist:
+      betterinputs.append(0 if d % 2 == 0 else 1)
+
+    result = neuron2(betterinputs)
+    predictions[f"{a}"] = f"{result}"
+    outputs.append(a)
+    decimals.append(result)
+
+  softmax = lambda x: [math.exp(i - max(x)) / sum(math.exp(j - max(x)) for j in x) for i in x] #just staight up stole this :)
+  finals = softmax(decimals)
+  
+  for b in range(len(finals)):
+    predictions[f"{outputs[b]}"] = f"{finals[b]}"
+    #predictions[f"{outputs[b]}"] = f"{decimals[b]}"
+
+  greatest = 0
+  next_word = None
+  for c in predictions:
+    candid = 0
+    candid = predictions[c]
+    candid = float(candid)
+    if candid > greatest:
+      greatest = candid
+      next_word = c
+
+  #woah = predictions[next_word]
+  #print(f"{next_word}: {woah}")
+
+  act = 0
+
+  return next_word
+  
+def analyze(file_path, target_phrase1, victor):
     file_content = ""
     fact = None
     fact2 = None
-    fact4 = None
     current_item2 = "APLACEHOLDEr"
     attributeslist = []
-
+    attributeslist2 = []
+    target_phrase = []
+    worddef = None
+    isa = None
+  
     try:
-      with open(file_path, "r") as file:
+        with open(file_path, "r") as file:
             file_content = file.read()
             json_data = json.loads(file_content)
             current_item = json_data
-      for a in target_phrase:
-        if a in ignore:
-          continue
-        if a in current_item2:
-              fact2 = current_item2[a]
-              attributeslist.append(fact2)
-              continue
-        if a in current_item:
-            fact = current_item[a]
-            current_item2 = fact
-            current_item = fact
-            fact4 = None
-            if '_is_a' in current_item:
-                fact4pre = current_item['_is_a']
-                fact4 = json_data[fact4pre]
+        win = victor - 1
+        for item in target_phrase1:
+         if target_phrase1[win] != 0:
+           target_phrase2 = target_phrase1[win]
+           target_phrase.append(target_phrase2)
+           break
+         else:
+           win += 1
+           continue
+        for w in target_phrase1:
+	        target_phrase.append(w)
+        if target_phrase2 == "0":
+          for object in target_phrase:
+            if object != "0":
+              target_phrase2 = object
 
-      if fact2 is not None:
-              print(f"2: {attributeslist}")
-      elif fact4 is not None:
-              print(f"4: {fact} {fact4}")
-      else:
-              print(f"1: {fact}")
+        for a in target_phrase:
+             if a in ignore:
+                continue
+             if a in current_item2:
+                fact2 = current_item2[a]
+                specs = fact2
+                attributeslist.append(fact2)
+                attributeslist2.append(fact2)
+                continue
+             if a in current_item:
+                fact = current_item[a]
+                attributeslist.append(fact)
+                current_item2 = fact
+                current_item = fact
+                fact4 = None
+                if 'definition' in current_item:
+                    worddef = current_item['definition']
+                if '_is_a' in current_item:
+                    fact4pre = current_item['_is_a']
+                    fact4 = json_data[fact4pre]
+                    isa = fact4['definition']
+                    attributeslist.append(fact4)
+                if '_sentence' in current_item:
+                  setup = current_item['_sentence']
+
+        if attributeslist:
+          if fact2 is not None:
+            attributeslist = f"{attributeslist2}"
+         
+          return attributeslist, worddef, isa, target_phrase2
+
+        else:
+          print("No response found.")
+          return None
+          
     except Exception as e:
-        print(f"An error occured during json or a answer might not be known: {e}")
-        return
+        print(f"An error occurred during json or a answer might not be known: {e}")
+        return None
 
-def parse(file_path, terms, act, poland, austria):
+def parse(terms):
   main = None
   codedex = None
   property1 = False
   newterm = None
 
   try:
-    with open(file_path, "r") as file:
-            file_content = file.read()
-            json_data = json.loads(file_content)
-            item = json_data
+    item = fileread('config.json')
 
     for h in terms:
       if h in item:
@@ -97,21 +238,21 @@ def parse(file_path, terms, act, poland, austria):
           newterm.append(term_item)
         if 'code' in item[main] and isinstance(item[main]['code'], list):
             codedex = item[main]['code']
+      for _ in range(2):
+        newterm.append("0")
 
     else:
       print("No input detected or main term not found in JSON data.")
       return
 
-    victor = think(codedex, act, poland, austria)
-
-    analyze_file_for_phrase(file_path, newterm, victor)
-
+    return newterm, codedex
+    
   except Exception as e:
     print(f"An error occured during parsing: {e}")
     return
 
 def values(value):
-  inputs = [0, 0, 0]
+  inputs = [0, 0, 0, 0, 0, 0]
 
   for c in range(len(value)):
     inputs[c] += value[c]
@@ -125,37 +266,50 @@ def values(value):
 
   return list1
 
-def neuron(inputt, act):
+def neuron(inputt, setcheck, act):
     output = 0
     output3 = 0
-    for i in range(len(inputt)):
+    austria = []
+    poland = []
+
+    for i in range(3):
       we = None
       we = weights[act]
       output += inputt[i] * we[i]
+      
+    if len(setcheck) < 3:
+      for i in range(3):
+        we = None
+        we = weights[act]
+        output += inputt[i + 3] * we[i]
 
     output += bias[act]
     output3 = 1 / ((2.718 ** (output * -1)) + 1)
 
     return output3
 
-def think(o, act, poland, austria):
+def think(o):
+  global act
 
+  poland = []
+  austria = []
+  
   for _ in range(3):
     hello1 = values(o)
-    hello2 = neuron(hello1, act)
+    hello2 = neuron(hello1, poland, act)
     if hello2 is not None:
       poland.append(hello2)
     act += 1
-
+    
   for _ in range(3):
-      hello3 = neuron(poland, act)
+      hello3 = neuron(poland, poland, act)
       if hello3 is not None:
         austria.append(hello3)
       act += 1
 
   for _ in range(1): #New layers
     for _ in range(3):
-      hello3 = neuron(austria, act)
+      hello3 = neuron(austria, poland, act)
       del austria[0]
       if hello3 is not None:
         austria.append(hello3)
@@ -169,12 +323,30 @@ def think(o, act, poland, austria):
       final = f
       winner = ins
       finish = f"Number {ins}: {f}"
-
+  act = 0
+ 
   return winner
+  
+def command(processed):
+  
+    newterm, codedex = parse(processed)
+    print("Request Parsed!")
+  
+    victor = think(codedex)
+    print("Priorities Found!")
 
-print("------Ken Phase 4/5------")
-inquiry = input("Question: ").lower()
-process1 = inquiry.translate(str.maketrans('', '', string.punctuation))
-word = process1.split()
+    results, worddef, isa, target_phrase2 = analyze("config.json", newterm, victor)
+    print("Data Retrieved!")
+    
+    finish = generate(target_phrase2, results, worddef, isa)
+  
+def start():
+  print("------Ken v.1------")
+  #inquiry = inpt("Question: ").lower()
+  inquiry = "python"
+  process1 = inquiry.translate(str.maketrans('', '',string.punctuation))
+  processed = process1.split()
 
-parse('config.json', word, act, poland, austria)
+  command(processed)
+   
+start()
