@@ -1,27 +1,27 @@
-
-{
-    "python": {
+"python": {
+        "definition": "a popular computer language",
         "year": "1991",
         "founder": "Van Russo",
         "_is_a" : "programming language",
-        "code" : [0, 0, 0]
-    },
-    "javascript": {
+        "code" : [1, 0, 0, 0, 0, 0],
+},
+"javascript": {
+        "definition": "a popular computer language",
         "year" : "1995",
         "founder": "Brendan Eich",
         "_is_a": "programming language",
-        "code": [1, 0, 0]
-    },
-    "kenadian": {
+        "code": [1, 0, 0, 0, 0, 1],
+},
+"kenadian": {
+        "definition": "content creator",
         "_is_a": "youtuber",
-        "code": [0, 1, 0]
-    },
-    "programming language": {
+        "code": [0, 1, 0, 0, 0, 0],
+},
+"programming language": {
        "definition": "How computers are told to do stuff",
-       "code": [0, 0, 1]
-    },
-    "youtuber": {
-      "definition": "The term for someone who posts on youtube",
-      "code": [1, 1, 0]
-    },
+       "code": [1, 0, 0, 0, 1, 0],
+},
+"youtuber": {
+      "definition": "someone who posts on youtube",
+      "code": [0, 1, 0, 0, 0, 0],
 }
