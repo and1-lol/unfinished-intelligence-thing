@@ -5,7 +5,7 @@ import math
 
 vocab = {
   "python": [1,1,0,1,1,0],
-  "javascript": [1,1,0,1,1,1],
+  "javascript": [1,1,0,1,1,0],
   "kenadian": [1,1,1,0,0,0],
   "programming language": [1,1,1,0,0,1],
   "youtuber": [1,1,1,0,0,1],
@@ -13,7 +13,7 @@ vocab = {
   "is": [1,0,0,1,0,1],
   "end": [1,1,1,1,1,1],
   "output": [1,1,1,1,1,0],
-  "year": [1,0,0,1,0,0],
+  "year": [1,1,1,1,0,0],
   "what": [0, 0, 0, 0, 0, 1],
   "how": [0, 0, 0, 0, 1, 0],
   "why": [0, 0, 0, 0, 1, 1],
@@ -60,7 +60,6 @@ vocab = {
   "they": [1, 0, 1, 1, 0, 0],
   "them": [1, 0, 1, 1, 0, 1],
   "their": [1, 0, 1, 1, 1, 0],
-  "is": [1, 0, 1, 1, 1, 1],
   "am": [1, 1, 0, 0, 0, 0],
   "are": [1, 1, 0, 0, 0, 1],
   "was": [1, 1, 0, 0, 1, 0],
@@ -70,14 +69,14 @@ vocab = {
 # Define your data structure
 data = {
     "python": {
-        "definition": "a popular computer language",
+        "definition": "popular computer language",
         "year": "1991",
         "founder": "Van Russo",
         "_is_a" : "programming language",
         "code" : [1, 0, 0, 0, 0, 0],
     },
     "javascript": {
-        "definition": "a popular computer language",
+        "definition": "popular computer language",
         "year" : "1995",
         "founder": "Brendan Eich",
         "_is_a": "programming language",
@@ -89,7 +88,7 @@ data = {
         "code": [0, 1, 0, 0, 0, 0],
     },
     "programming language": {
-       "definition": "How computers are told to do stuff",
+       "definition": "how computers are told to do stuff",
        "code": [1, 0, 0, 0, 1, 0],
     },
     "youtuber": {
@@ -128,15 +127,15 @@ bias = [
 ]
 
 weights2 = [
-  [10.803009202493115, 7.741692064928607, -3.9980048891784388],
-  [14.820763705375654, -4.120964738645601, -5.950730866885619],
-  [9.81092086528214, 7.110834918661597, -3.945579173488027]
+  [-2.9029863164024823, 3.532481315808165, -6.4980621637364715, -2.7001942531931027, 5.622569639790494, 2.3671970620310265],
+    [-1.9806637832910954, -7.286999359842931, -3.3923895132168886, -2.1493171453891393, -3.183213008797972, 6.963251657282201],
+    [-5.076851093156488, 3.1415057642466233, 4.271652924106466, -6.683544978016405, 0.568472204124083, -6.681382911430469]
 ]
 
 bias2 = [
-  -27.78368730353716,
-  -22.849621581435137,
-  -25.08207551760522
+  -9.001554471326235  ,
+    -3.79934611715847 ,
+    -5.154262322889636
 ]
 
 def fileread(file):
@@ -186,14 +185,10 @@ def neuron2(input):
       
     output = 0
     output3 = 0
-    for i in range(3):
+    for i in range(6):
       we = None
       we = weights2[act]
       output += input[i] * we[i]
-    for i in range(3):
-      we = None
-      we = weights2[act]
-      output += input[i + 3] * we[i]
 
     output += bias2[act]
     output3 = 1 / ((2.718 ** (output * -1)) + 1)
@@ -218,6 +213,8 @@ def finder(value):
       betterinputs.append(0 if d % 2 == 0 else 1)
 
     result = neuron2(betterinputs)
+    #if a == "is" or a == "a":
+      #print(a, betterinputs, result)
     predictions[f"{a}"] = f"{result}"
     outputs.append(a)
     decimals.append(result)
@@ -238,7 +235,7 @@ def finder(value):
     if candid > greatest:
       greatest = candid
       next_word = c
-
+  
   #woah = predictions[next_word]
   #print(f"{next_word}: {woah}")
 
@@ -448,7 +445,7 @@ def command(processed):
 def start():
   print("------Ken v.1------")
   #inquiry = inpt("Question: ").lower()
-  inquiry = "python"
+  inquiry = "kenadian"
   process1 = inquiry.translate(str.maketrans('', '',string.punctuation))
   processed = process1.split()
 
