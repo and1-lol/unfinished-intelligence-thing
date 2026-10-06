@@ -155,18 +155,16 @@ def fileread(file):
 
 def create(word):
   global weights2, bias2
-  rate = 0.1
-
+  rate = 0.05
+  prevkey = [1,0,0,1,0,1]
   for i in range(3):
-   if i == 0:
-     prevkey = [1,0,0,1,0,1]
    if i == 1:
      prevkey = [1, 0, 0, 1, 0, 0]
    if i == 2:
      prevkey = [1,1,1,1,1,0]
    key = prevkey
     
-   prew = [-0.5194, 0.9066, -0.0845, 0.1442, 0.9803, -0.2551]
+   prew = [-1.5194, 1.9066, -0.0845, 0.1442, 0.9803, -1.2551]
    preb = 0
 
    copy = trains.copy()
@@ -176,12 +174,13 @@ def create(word):
       word[c] += key[c]
    for e in word:
       key2.append(0 if e % 2 == 0 else 1)
+   print(key2)
 
    key3 = key2, 1
    copy.append(key3)
 
    for q in range(6):
-    for exe in range(200):
+    for exe in range(1000):
      for val, exp in copy:
       result = trainneuron(val, prew, preb, i)
       error = exp - result
@@ -191,11 +190,11 @@ def create(word):
         we2[e] += rate * error * val[e]
 
       preb += rate * error
-
    weights2.append(prew)
    bias2.append(preb)
    del copy
-   word = prevkey
+   word = key2
+  print(weights2, bias2)
   return
 
 def trainneuron(input, prew, preb, z):
@@ -204,8 +203,7 @@ def trainneuron(input, prew, preb, z):
     output = 0
     output3 = 0
     for i in range(6):
-      we = input
-      output += input[i] * we[i]
+      output += input[i] * prew[i]
 
     output += preb
     output3 = 1 / ((2.718 ** (output * -1)) + 1)
@@ -516,7 +514,7 @@ def command(processed):
 def start():
   print("------Ken v.2------")
   #inquiry = inpt("Question: ").lower()
-  inquiry = "kenadian"
+  inquiry = "python"
   process1 = inquiry.translate(str.maketrans('', '',string.punctuation))
   processed = process1.split()
 
