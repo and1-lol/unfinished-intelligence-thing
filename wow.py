@@ -69,7 +69,6 @@ vocab = {
   "a": [1, 0, 0, 1, 0, 0],
   "an": [1, 0, 0, 1, 0, 1],
   "this": [1, 0, 1, 1, 0, 0],  
-  "that": [1, 0, 0, 1, 1, 1],
   "these": [1, 0, 1, 0, 0, 0],
   "those": [1, 0, 1, 0, 0, 1],
   "it": [1, 0, 1, 0, 1, 0],
@@ -80,7 +79,8 @@ vocab = {
   "am": [1, 1, 0, 0, 0, 0],
   "are": [1, 1, 0, 0, 0, 1],
   "was": [1, 1, 0, 0, 1, 0],
-  "were": [1, 1, 0, 0, 1, 1]
+  "were": [1, 1, 0, 0, 1, 1],
+  "means": [1,1,1,1,0,1]
 }
 
 # Define your data structure
@@ -156,31 +156,31 @@ def fileread(file):
 def create(word):
   global weights2, bias2
   rate = 0.05
-  prevkey = [1,0,0,1,0,1]
+  prevkey = [[1,0,0,1,0,1], [1,1,1,1,0,1], [0,1,1,1,1,0]]
   for i in range(3):
    if i == 1:
-     prevkey = [1, 0, 0, 1, 0, 0]
+     prevkey = [[0,1,0,1,1,1], [1, 0, 0, 1, 0, 0], [1, 0, 1, 0, 1, 1]]
    if i == 2:
-     prevkey = [1,1,1,1,1,0]
-   key = prevkey
+     prevkey = [[1,1,1,1,1,0], [1,1,1,1,1,1]]
+   trainpre = prevkey
     
    prew = [-1.5194, 1.9066, -0.0845, 0.1442, 0.9803, -1.2551]
    preb = 0
 
    copy = trains.copy()
   
-   key2 = []
-   for c in range(len(key)):
-      word[c] += key[c]
-   for e in word:
-      key2.append(0 if e % 2 == 0 else 1)
-   print(key2)
+   for key in trainpre:
+     key2 = []
+     for c in range(len(key)):
+        word[c] += key[c]
+     for e in word:
+        key2.append(0 if e % 2 == 0 else 1)
 
-   key3 = key2, 1
-   copy.append(key3)
+     key3 = key2, 1
+     copy.append(key3)
 
    for q in range(6):
-    for exe in range(1000):
+    for exe in range(250):
      for val, exp in copy:
       result = trainneuron(val, prew, preb, i)
       error = exp - result
@@ -193,7 +193,8 @@ def create(word):
    weights2.append(prew)
    bias2.append(preb)
    del copy
-   word = key2
+   print(i, word, key)
+   word = trainpre[0]
   print(weights2, bias2)
   return
 
